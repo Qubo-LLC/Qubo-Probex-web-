@@ -1,4 +1,8 @@
-/* ─── FONTS — must be first @import before any rules ────────────────── */
+/* ─── FONTS ──────────────────────────────────────────────────────────
+   Primary loading is handled by next/font (see app/layout.tsx), exposed as
+   --font-heading / --font-mono. This @import is a fallback for sections that
+   still reference the literal family names; remove in Phase 7 once every
+   component consumes the variables.                                       */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 
 @import "tailwindcss";
@@ -23,12 +27,24 @@
   --cyan-muted:       rgba(0, 229, 255, 0.10);
   --cyan-glow:        rgba(0, 229, 255, 0.22);
 
-  /* ── VIOLET ACCENT (new) ── */
+  /* ── VIOLET ACCENT (data / secondary channel) ── */
   --violet:           #7c3aed;
   --violet-dim:       #8b5cf6;
   --violet-soft:      #a78bfa;
   --violet-muted:     rgba(124, 58, 237, 0.12);
   --violet-glow:      rgba(124, 58, 237, 0.20);
+
+  /* ── ROYAL BLUE / INDIGO (atmosphere only — not a brand CTA color) ── */
+  --royal-blue:       #173bab;
+  --indigo:           #4f46e5;
+  --blue:             #3b82f6;
+
+  /* ── SIGNATURE BRAND GRADIENT (primary CTAs) — cyan → violet ── */
+  --gradient-primary: linear-gradient(135deg, #00e5ff 0%, #0ea5e9 50%, #7c3aed 100%);
+
+  /* ── TYPOGRAPHY VARIABLES (next/font with literal fallbacks) ── */
+  --font-heading-stack: var(--font-heading), 'Manrope', var(--font-geist-sans), 'SF Pro Display', system-ui, sans-serif;
+  --font-mono-stack:    var(--font-mono), 'JetBrains Mono', var(--font-geist-mono), 'SF Mono', monospace;
 
   /* ── TEXT ── */
   --text-primary:     #e8edf4;
@@ -60,7 +76,7 @@ html, body { height: 100%; }
 body {
   background: var(--bg-base);
   color: var(--text-primary);
-  font-family: 'Manrope', var(--font-geist-sans), 'SF Pro Display', system-ui, sans-serif;
+  font-family: var(--font-heading-stack);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   position: relative;
@@ -102,7 +118,7 @@ body::after {
 /* ─── TYPOGRAPHY SYSTEM ──────────────────────────────────────────────── */
 /* Manrope for all headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Manrope', var(--font-geist-sans), sans-serif;
+  font-family: var(--font-heading-stack);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -110,7 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 /* JetBrains Mono for all data/metric values */
 .font-data, .mono-value, code, pre,
 [class*="font-mono"] {
-  font-family: 'JetBrains Mono', var(--font-geist-mono), 'SF Mono', monospace;
+  font-family: var(--font-mono-stack);
 }
 
 /* ─── TEXT GRADIENTS ─────────────────────────────────────────────────── */
@@ -255,3 +271,97 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── PERFORMANCE ACCELERATION ───────────────────────────────────────── */
 .gpu { will-change: transform; transform: translateZ(0); }
+
+/* ─── SHARED GLASS & SURFACE SYSTEM (Phase 1 → future phases) ─────────────
+   Purely visual utilities: no display / layout properties, so they can be
+   combined with any Tailwind layout classes without conflict.            */
+
+/* Translucent floating panel — for overlays, HUD/telemetry, chrome.
+   Write only the standard property: Lightning CSS (Tailwind v4) adds the
+   -webkit- prefix from browser targets. Hand-writing both makes it collapse
+   to the prefixed-only form, which modern Chrome ignores. */
+.glass-panel {
+  background: rgba(13, 24, 48, 0.42);
+  backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Elevated glass card — for content cards that sit over static surfaces */
+.glass-card {
+  background: rgba(11, 20, 40, 0.55);
+  backdrop-filter: blur(16px) saturate(115%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+}
+
+/* Ambient elevation without hard drop-shadow */
+.panel-shadow {
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Subtle inner top-edge highlight for a "lit from above" surface */
+.surface-highlight {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Masked 1px gradient border (cyan → violet), no opaque outline */
+.gradient-border { position: relative; }
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.32), rgba(124, 58, 237, 0.20) 60%, transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Soft cyan text glow — depth, not a hard neon shadow */
+.text-glow-cyan { text-shadow: 0 0 24px rgba(0, 229, 255, 0.22); }
+
+/* ─── SHARED BUTTON SYSTEM (CTA) ─────────────────────────────────────────
+   Visual-only: display/padding/radius stay in the markup so buttons keep
+   their existing responsive + framer-motion behaviour.                   */
+.btn-primary {
+  font-family: var(--font-heading-stack);
+  font-weight: 700;
+  color: #060b18;
+  background: var(--gradient-primary);
+  cursor: pointer;
+  will-change: transform;
+}
+
+.btn-glass {
+  font-family: var(--font-heading-stack);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: rgba(13, 24, 48, 0.35);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  will-change: transform;
+}
+.btn-glass:hover {
+  color: var(--text-primary);
+  border-color: rgba(0, 229, 255, 0.38);
+  background: rgba(13, 24, 48, 0.5);
+}
+
+/* ─── REDUCED MOTION ─────────────────────────────────────────────────────
+   Neutralise the infinite CSS keyframe utilities for users who opt out.
+   Component-level framer-motion honours prefers-reduced-motion separately. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-pulse-glow,
+  .animate-data-blink,
+  .animate-float-y,
+  .animate-scan {
+    animation: none !important;
+  }
+  html { scroll-behavior: auto; }
+}

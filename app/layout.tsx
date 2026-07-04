@@ -1,8 +1,27 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+
+/* ── SELF-HOSTED FONTS (next/font) ──────────────────────────────────────
+   Exposed as CSS variables so components consume --font-heading / --font-mono.
+   The Google @import in globals.css is retained as a fallback for sections
+   not yet migrated to the variables; scheduled for removal in Phase 7. */
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "QUBO LLC — Probex Predictive Infrastructure",
@@ -19,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className={`${manrope.variable} ${jetbrainsMono.variable} antialiased`}>
       <body className="min-h-screen flex flex-col bg-[var(--bg-base)]">
 
         {/* ── AMBIENT RADIAL LAYERS ── */}
