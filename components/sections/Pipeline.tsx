@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Fragment } from "react";
 import Reveal from "@/components/ui/Reveal";
+import { staggerContainer, cardReveal, lineGrow, defaultViewport } from "@/components/ui/motion";
 
 /* ─── DATA ─────────────────────────────────────────────────────────── */
 const STAGES = [
@@ -65,6 +67,61 @@ const LIVE_METRICS = [
   { label: "Events/sec",     value: "62,400" },
   { label: "Uptime (30d)",   value: "99.97%" },
 ];
+
+/* ─── FLOW OVERVIEW STRIP ────────────────────────────────────────────────
+   Lightweight institutional summary of the four stages, shown above the
+   detailed cards so a scanning reader grasps the full flow at a glance.
+   Reuses the STAGES data directly — no duplicated content. */
+function FlowOverview() {
+  return (
+    <motion.div
+      role="list"
+      aria-label="Processing flow overview"
+      variants={staggerContainer}
+      initial="hidden"
+      whileInView="show"
+      viewport={defaultViewport}
+      className="mb-14 flex flex-col md:flex-row md:items-center gap-3 md:gap-0"
+    >
+      {STAGES.map((s, i) => (
+        <Fragment key={s.index}>
+          <motion.div
+            role="listitem"
+            variants={cardReveal}
+            className="glass-panel rounded-lg px-3.5 py-2.5 flex items-center gap-2.5 shrink-0"
+          >
+            <span
+              className="grid place-items-center w-6 h-6 rounded-md text-[10px] font-semibold shrink-0"
+              style={{
+                fontFamily: "var(--font-mono-stack)",
+                color: s.accent,
+                background: `${s.accent}14`,
+                border: `1px solid ${s.accent}33`,
+              }}
+            >
+              {s.index}
+            </span>
+            <span
+              className="text-[10px] tracking-[0.18em] uppercase whitespace-nowrap"
+              style={{ fontFamily: "var(--font-mono-stack)", color: s.accent }}
+            >
+              {s.tag}
+            </span>
+          </motion.div>
+
+          {i < STAGES.length - 1 && (
+            <motion.div
+              aria-hidden
+              variants={lineGrow}
+              className="hidden md:block flex-1 h-px mx-2 origin-left"
+              style={{ background: `linear-gradient(to right, ${s.accent}66, ${STAGES[i + 1].accent}66)` }}
+            />
+          )}
+        </Fragment>
+      ))}
+    </motion.div>
+  );
+}
 
 /* ─── STAGE CARD ───────────────────────────────────────────────────── */
 function StageCard({ stage, i }: { stage: typeof STAGES[0]; i: number }) {
@@ -231,6 +288,9 @@ export default function Pipeline() {
             90 milliseconds end-to-end.
           </p>
         </Reveal>
+
+        {/* ── FLOW OVERVIEW STRIP ── */}
+        <FlowOverview />
 
         {/* ── STAGES ── */}
         <div>
