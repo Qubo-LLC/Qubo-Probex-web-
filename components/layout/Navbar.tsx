@@ -6,7 +6,7 @@ import {
   useTransform,
   useMotionTemplate,
 } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, ExternalLink } from "lucide-react";
 
 const NAV_LINKS = [
@@ -16,18 +16,25 @@ const NAV_LINKS = [
   { name: "Research",      id: "research"      },
 ];
 
+const SPY_IDS = ["home", ...NAV_LINKS.map((l) => l.id)];
+
 const PROBEX_URL = process.env.NEXT_PUBLIC_PROBEX_URL ?? "#";
 
-function NavLink({ name, onClick }: { name: string; onClick: () => void }) {
+function NavLink({ name, active, onClick }: { name: string; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="relative group text-sm tracking-wide transition-colors duration-200 hover:text-white gpu"
-      style={{ color: "var(--text-secondary)", fontFamily: "Manrope, sans-serif", fontWeight: 500 }}
+      aria-current={active ? "true" : undefined}
+      className={`relative group text-[11px] uppercase tracking-[0.18em] font-medium transition-colors duration-200 gpu ${
+        active ? "text-[var(--cyan)]" : "text-[var(--text-secondary)] hover:text-white"
+      }`}
+      style={{ fontFamily: "var(--font-mono-stack)" }}
     >
       {name}
       <span
-        className="absolute left-0 -bottom-px h-px w-0 group-hover:w-full transition-all duration-300"
+        className={`absolute left-0 -bottom-1.5 h-px transition-all duration-300 ${
+          active ? "w-full" : "w-0 group-hover:w-full"
+        }`}
         style={{ background: "var(--cyan)" }}
       />
     </button>
@@ -37,6 +44,7 @@ function NavLink({ name, onClick }: { name: string; onClick: () => void }) {
 export default function Navbar() {
   const { scrollY } = useScroll();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeId, setActiveId] = useState("home");
 
   const bgOpacity   = useTransform(scrollY, [0, 100], [0, 0.96]);
   const borderAlpha = useTransform(scrollY, [0, 100], [0.05, 0.13]);
@@ -45,6 +53,24 @@ export default function Navbar() {
   const backgroundColor = useMotionTemplate`rgba(6,11,24,${bgOpacity})`;
   const backdropFilter  = useMotionTemplate`blur(${blur}px)`;
   const borderBottom    = useMotionTemplate`1px solid rgba(148,163,184,${borderAlpha})`;
+
+  // Scrollspy — highlight the nav item whose section owns the viewport band
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveId(visible[0].target.id);
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] }
+    );
+    SPY_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -57,7 +83,7 @@ export default function Navbar() {
         style={{ backgroundColor, backdropFilter, borderBottom }}
         className="fixed top-0 left-0 w-full z-50"
       >
-        <div className="max-w-6xl mx-auto px-6 h-15 flex items-center justify-between" style={{ height: "3.75rem" }}>
+        <div className="max-w-6xl mx-auto px-6 h-[3.75rem] flex items-center justify-between">
 
           {/* LOGO */}
           <button
@@ -86,7 +112,12 @@ export default function Navbar() {
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map((item) => (
-              <NavLink key={item.id} name={item.name} onClick={() => scrollTo(item.id)} />
+              <NavLink
+                key={item.id}
+                name={item.name}
+                active={activeId === item.id}
+                onClick={() => scrollTo(item.id)}
+              />
             ))}
           </nav>
 
@@ -97,12 +128,7 @@ export default function Navbar() {
               <motion.span
                 whileHover={{ scale: 1.04, boxShadow: "0 0 24px rgba(0,229,255,0.32)" }}
                 whileTap={{ scale: 0.96 }}
-                className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold tracking-widest uppercase cursor-pointer gpu"
-                style={{
-                  background: "linear-gradient(135deg, #00e5ff 0%, #0ea5e9 100%)",
-                  color: "#060b18",
-                  fontFamily: "'JetBrains Mono', monospace",
-                }}
+                className="btn-primary hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs tracking-widest uppercase gpu"
               >
                 Access Probex
                 <ExternalLink size={11} />
@@ -138,25 +164,20 @@ export default function Navbar() {
             <button
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className="text-left text-sm tracking-wide py-3 transition-colors duration-200 hover:text-white"
+              aria-current={activeId === item.id ? "true" : undefined}
+              className={`text-left text-[11px] uppercase tracking-[0.18em] py-3 transition-colors duration-200 ${
+                activeId === item.id ? "text-[var(--cyan)]" : "text-[var(--text-secondary)] hover:text-white"
+              }`}
               style={{
-                color: "var(--text-secondary)",
                 borderBottom: "1px solid rgba(148,163,184,0.05)",
-                fontFamily: "Manrope, sans-serif",
+                fontFamily: "var(--font-mono-stack)",
               }}
             >
               {item.name}
             </button>
           ))}
           <a href={PROBEX_URL} target="_blank" rel="noopener noreferrer">
-            <span
-              className="flex items-center justify-center gap-2 mt-3 py-3 rounded text-xs font-semibold tracking-widest uppercase cursor-pointer"
-              style={{
-                background: "linear-gradient(135deg, #00e5ff 0%, #0ea5e9 100%)",
-                color: "#060b18",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
+            <span className="btn-primary flex items-center justify-center gap-2 mt-3 py-3 rounded-lg text-xs tracking-widest uppercase">
               Access Probex <ExternalLink size={11} />
             </span>
           </a>
