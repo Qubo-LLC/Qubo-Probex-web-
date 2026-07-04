@@ -69,8 +69,13 @@
 
 /* ─── RESET ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-html, body { height: 100%; }
+html { scroll-behavior: smooth; height: 100%; }
+/* NOTE: body must NOT be locked to height:100%. The body is a min-h-screen
+   flex column; a fixed 100% height turns it into a 100vh flex container and
+   flexbox shrinks the footer (overflow-hidden → min-height:0) down to its
+   1px border while the taller content above overflows. Use min-height so the
+   body grows with content and the footer keeps its intrinsic height. */
+body { min-height: 100%; }
 
 /* ─── BODY ────────────────────────────────────────────────────────────── */
 body {
