@@ -21,13 +21,6 @@ const LIVE_STATS = [
   { label: "Markets",    value: "840+"    },
 ];
 
-/* Ambient engine-health readout — native Probex telemetry, not decorative */
-const ENGINE_STATUS = [
-  { label: "Consensus",      value: "99.42%" },
-  { label: "Latency",        value: "< 90ms" },
-  { label: "Active Markets", value: "840"    },
-];
-
 export default function Hero() {
   const { scrollY }     = useScroll();
   const waveY           = useTransform(scrollY, [0, 600], [0, 90]);
@@ -104,42 +97,47 @@ export default function Hero() {
         style={{ y: contentY, rotateX, rotateY, transformPerspective: 1200 }}
         className="relative z-10 flex flex-col items-center gpu"
       >
-        {/* STATUS PILL */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-7"
-        >
-          <span
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] tracking-[0.24em] uppercase font-medium"
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              background: "rgba(0,229,255,0.06)",
-              border: "1px solid rgba(0,229,255,0.18)",
-              color: "var(--cyan)",
-            }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full animate-data-blink" style={{ background: "var(--cyan)" }} />
-            Probex Engine · Live
-          </span>
-        </motion.div>
-
-        {/* HEADLINE + soft radial light for depth (peak ~15% opacity) */}
+        {/* HEADLINE + environmental lighting */}
         <div className="relative">
-          <div
-            aria-hidden
-            className="absolute left-1/2 top-1/2 pointer-events-none"
-            style={{
-              width: 640,
-              height: 340,
-              transform: "translate(-50%, -50%)",
-              background:
-                "radial-gradient(ellipse at center, rgba(0,229,255,0.15) 0%, rgba(23,59,171,0.10) 42%, transparent 72%)",
-              filter: "blur(64px)",
-              zIndex: 0,
-            }}
-          />
+          {/* Environmental lighting — layered radial glows (soft bloom, no text-shadow) */}
+          <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+            {/* large ambient cyan wash */}
+            <div
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: 860, height: 460, transform: "translate(-50%,-50%)",
+                background: "radial-gradient(ellipse at center, rgba(0,229,255,0.14) 0%, rgba(0,229,255,0.05) 38%, transparent 70%)",
+                filter: "blur(76px)",
+              }}
+            />
+            {/* royal-blue depth, offset up-left */}
+            <div
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: 640, height: 440, transform: "translate(-58%,-40%)",
+                background: "radial-gradient(ellipse at center, rgba(23,59,171,0.16) 0%, transparent 68%)",
+                filter: "blur(84px)",
+              }}
+            />
+            {/* violet accent, offset down-right */}
+            <div
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: 540, height: 380, transform: "translate(-42%,-58%)",
+                background: "radial-gradient(ellipse at center, rgba(124,58,237,0.10) 0%, transparent 66%)",
+                filter: "blur(78px)",
+              }}
+            />
+            {/* tight bright bloom core */}
+            <div
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: 320, height: 210, transform: "translate(-50%,-50%)",
+                background: "radial-gradient(ellipse at center, rgba(120,240,255,0.12) 0%, transparent 72%)",
+                filter: "blur(44px)",
+              }}
+            />
+          </div>
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -250,49 +248,6 @@ export default function Hero() {
           </motion.button>
         </motion.div>
       </motion.div>
-
-      {/* ── PROBEX ENGINE STATUS — ambient telemetry (lg+) ── */}
-      <motion.aside
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 1.1 }}
-        aria-label="Probex engine status"
-        className="hidden lg:block absolute bottom-10 left-10 z-10 glass-panel rounded-lg px-4 py-3.5"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full animate-data-blink" style={{ background: "#22c55e" }} />
-          <span
-            className="text-[8px] tracking-[0.28em] uppercase"
-            style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-secondary)" }}
-          >
-            Probex Engine
-          </span>
-          <span
-            className="text-[8px] tracking-[0.24em] uppercase"
-            style={{ fontFamily: "var(--font-mono-stack)", color: "#22c55e" }}
-          >
-            Live
-          </span>
-        </div>
-        <div className="flex flex-col gap-2">
-          {ENGINE_STATUS.map((s) => (
-            <div key={s.label} className="flex items-center justify-between gap-8">
-              <span
-                className="text-[9px] tracking-[0.16em] uppercase"
-                style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-muted)" }}
-              >
-                {s.label}
-              </span>
-              <span
-                className="text-[10px] font-semibold tabular-nums"
-                style={{ fontFamily: "var(--font-mono-stack)", color: "var(--cyan-dim)" }}
-              >
-                {s.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </motion.aside>
 
       {/* ── SCROLL INDICATOR ── */}
       <motion.div
