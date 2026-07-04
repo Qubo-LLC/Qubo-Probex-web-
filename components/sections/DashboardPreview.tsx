@@ -231,7 +231,7 @@ export default function DashboardPreview() {
                     key={p.market}
                     className="grid gap-2 px-4 py-2.5"
                     style={{ gridTemplateColumns: "1fr 3rem 4rem 6rem 5rem", borderBottom: "1px solid rgba(148,163,184,0.03)" }}
-                    whileHover={{ background: "rgba(0,229,255,0.025)" }}
+                    whileHover={{ backgroundColor: "rgba(0,229,255,0.025)" }}
                   >
                     <span className="self-center truncate" style={{ fontFamily: "var(--font-heading-stack)", fontSize: "0.72rem", color: "var(--text-secondary)" }}>{p.market}</span>
                     <span className="self-center text-[10px] font-semibold px-1.5 py-0.5 rounded text-center" style={{ fontFamily: "var(--font-mono-stack)", color: dirColor, background: `${dirColor}14`, border: `1px solid ${dirColor}30`, width: "fit-content" }}>{p.dir}</span>
