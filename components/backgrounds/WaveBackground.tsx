@@ -3,42 +3,96 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import { useRef, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useRef, useMemo, useState, useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
-/* ─── THREE.JS POINT SURFACE (internal logic UNCHANGED) ─────────────── */
-function LiquiditySurface() {
+/* ─── LAYER CONFIG ───────────────────────────────────────────────────────
+   The wave displacement formula is UNCHANGED from the original single-layer
+   implementation — each layer only scales it by `amp` (amplitude) and `speed`
+   (time), and offsets its resting height by `yOffset`. This preserves the
+   original mathematics while composing two independent, depth-separated
+   particle fields.                                                          */
+interface LayerConfig {
+  cols: number;
+  rows: number;
+  spacingX: number;
+  spacingZ: number;
+  speed: number;          // time multiplier
+  amp: number;            // amplitude multiplier
+  yOffset: number;        // resting height (depth separation)
+  size: number;
+  opacity: number;
+  palette: [string, string, string]; // [low, mid, highlight]
+  highlightChance: number;            // fraction of points lifted toward highlight
+  updateEvery: number;                // JS position recompute cadence (1 = every frame)
+}
+
+/* Original displacement — factored out so both layers share identical math */
+function displace(x: number, z: number, t: number): number {
+  return (
+    Math.sin(x * 0.18 + t * 0.9) * 0.55 +
+    Math.cos(z * 0.22 + t * 0.7) * 0.45 +
+    Math.sin((x + z) * 0.12 + t * 1.1) * 0.30 +
+    Math.sin(x * 0.06 - t * 0.5) * 0.20
+  );
+}
+
+function WaveLayer({ cfg }: { cfg: LayerConfig }) {
   const ref = useRef<THREE.Points>(null!);
-  const cols = 220;
-  const rows = 100;
-  const spacingX = 0.13;
-  const spacingZ = 0.18;
+  const {
+    cols, rows, spacingX, spacingZ, speed, amp, yOffset,
+    size, opacity, palette, highlightChance, updateEvery,
+  } = cfg;
 
+  // Resting geometry — pre-displaced at t=0 so a paused/reduced-motion frame
+  // already reads as a wave rather than a flat grid.
   const positions = useMemo(() => {
     const arr = new Float32Array(cols * rows * 3);
     let i = 0;
     for (let x = 0; x < cols; x++) {
       for (let z = 0; z < rows; z++) {
         arr[i]     = (x - cols / 2) * spacingX;
-        arr[i + 1] = 0;
+        arr[i + 1] = yOffset + amp * displace(x, z, 0);
         arr[i + 2] = (z - rows / 2) * spacingZ;
         i += 3;
       }
     }
     return arr;
-  }, []);
+  }, [cols, rows, spacingX, spacingZ, yOffset, amp]);
+
+  // Per-point colour: horizontal low→mid gradient, subtle brightness jitter,
+  // and sparse highlights → depth + lighting without any per-frame cost.
+  const colors = useMemo(() => {
+    const arr = new Float32Array(cols * rows * 3);
+    const cLow = new THREE.Color(palette[0]);
+    const cMid = new THREE.Color(palette[1]);
+    const cHigh = new THREE.Color(palette[2]);
+    let i = 0;
+    for (let x = 0; x < cols; x++) {
+      const tx = cols > 1 ? x / (cols - 1) : 0;
+      const base = cLow.clone().lerp(cMid, tx);
+      for (let z = 0; z < rows; z++) {
+        const c = base.clone().multiplyScalar(0.82 + Math.random() * 0.18);
+        if (Math.random() < highlightChance) c.lerp(cHigh, 0.6);
+        arr[i] = c.r; arr[i + 1] = c.g; arr[i + 2] = c.b;
+        i += 3;
+      }
+    }
+    return arr;
+  }, [cols, rows, palette, highlightChance]);
+
+  const frameRef = useRef(0);
 
   useFrame(({ clock }) => {
-    const t   = clock.getElapsedTime();
+    frameRef.current += 1;
+    if (updateEvery > 1 && frameRef.current % updateEvery !== 0) return;
+
+    const t = clock.getElapsedTime() * speed;
     const pos = ref.current.geometry.attributes.position.array as Float32Array;
     let i = 0;
     for (let x = 0; x < cols; x++) {
       for (let z = 0; z < rows; z++) {
-        pos[i + 1] =
-          Math.sin(x * 0.18  + t * 0.9)  * 0.55 +
-          Math.cos(z * 0.22  + t * 0.7)  * 0.45 +
-          Math.sin((x + z) * 0.12 + t * 1.1) * 0.30 +
-          Math.sin(x * 0.06  - t * 0.5)  * 0.20;
+        pos[i + 1] = yOffset + amp * displace(x, z, t);
         i += 3;
       }
     }
@@ -46,13 +100,13 @@ function LiquiditySurface() {
   });
 
   return (
-    <Points ref={ref} positions={positions} stride={3}>
+    <Points ref={ref} positions={positions} colors={colors} stride={3}>
       <PointMaterial
-        color="#00e5ff"
-        size={0.04}
+        vertexColors
+        size={size}
         sizeAttenuation
         transparent
-        opacity={0.72}
+        opacity={opacity}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -60,7 +114,7 @@ function LiquiditySurface() {
   );
 }
 
-/* ─── SVG ORGANIC FLOW PATHS — Framer Motion, ultra-low opacity 0.02-0.04 */
+/* ─── SVG ORGANIC FLOW PATHS — Framer Motion, ultra-low opacity ────────── */
 const FLOW_PATHS = [
   { d: "M-80 420 C 120 340, 280 500, 480 380 S 720 260, 960 340 S 1200 460, 1440 360", delay: 0,   dur: 14 },
   { d: "M-80 460 C 100 360, 300 520, 520 400 S 760 300, 1000 390 S 1260 500, 1520 400", delay: 2.5, dur: 18 },
@@ -71,7 +125,7 @@ const FLOW_PATHS = [
 
 const GRAD_IDS = ["wfg0", "wfg1", "wfg2"];
 
-function SvgFlowLayer() {
+function SvgFlowLayer({ animate }: { animate: boolean }) {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
@@ -88,51 +142,146 @@ function SvgFlowLayer() {
             <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="wfg2" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="#7c3aed" stopOpacity="0" />
-            <stop offset="50%"  stopColor="#8b5cf6" stopOpacity="0.35" />
+            <stop offset="0%"   stopColor="#173bab" stopOpacity="0" />
+            <stop offset="50%"  stopColor="#4f46e5" stopOpacity="0.35" />
             <stop offset="100%" stopColor="#00e5ff" stopOpacity="0" />
           </linearGradient>
         </defs>
-        {FLOW_PATHS.map((p, i) => (
-          <motion.path
-            key={i}
-            d={p.d}
-            fill="none"
-            stroke={`url(#${GRAD_IDS[i % 3]})`}
-            strokeWidth={i % 2 === 0 ? 1.1 : 0.65}
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{
-              pathLength: [0, 1, 0],
-              opacity:    [0, 0.026 + (i % 3) * 0.007, 0],
-            }}
-            transition={{
-              duration: p.dur,
-              delay:    p.delay,
-              repeat:   Infinity,
-              ease:     "easeInOut",
-              times:    [0, 0.5, 1],
-            }}
-          />
-        ))}
+        {FLOW_PATHS.map((p, i) =>
+          animate ? (
+            <motion.path
+              key={i}
+              d={p.d}
+              fill="none"
+              stroke={`url(#${GRAD_IDS[i % 3]})`}
+              strokeWidth={i % 2 === 0 ? 1.1 : 0.65}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{
+                pathLength: [0, 1, 0],
+                opacity:    [0, 0.026 + (i % 3) * 0.007, 0],
+              }}
+              transition={{
+                duration: p.dur,
+                delay:    p.delay,
+                repeat:   Infinity,
+                ease:     "easeInOut",
+                times:    [0, 0.5, 1],
+              }}
+            />
+          ) : (
+            <path
+              key={i}
+              d={p.d}
+              fill="none"
+              stroke={`url(#${GRAD_IDS[i % 3]})`}
+              strokeWidth={i % 2 === 0 ? 1.1 : 0.65}
+              opacity={0.03}
+            />
+          )
+        )}
       </svg>
     </div>
   );
 }
 
 export default function WaveBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+
+  const [mounted, setMounted] = useState(false);
+  const [inView, setInView] = useState(true);
+  const [docVisible, setDocVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mount, responsive density, document-visibility
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const onMq = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const onVis = () => setDocVisible(!document.hidden);
+    mq.addEventListener("change", onMq);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      mq.removeEventListener("change", onMq);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  // Pause render loop when the hero scrolls out of view
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [mounted]);
+
+  // reduced-motion → single static frame; otherwise run only while visible
+  const frameloop: "always" | "never" | "demand" = reduced
+    ? "demand"
+    : inView && docVisible
+    ? "always"
+    : "never";
+
+  const fgCfg: LayerConfig = useMemo(
+    () => ({
+      cols: isMobile ? 120 : 200,
+      rows: isMobile ? 56 : 96,
+      spacingX: 0.13,
+      spacingZ: 0.18,
+      speed: 1.05,
+      amp: 1.0,
+      yOffset: 0,
+      size: 0.045,
+      opacity: 0.8,
+      palette: ["#00e5ff", "#22d3ee", "#eafaff"], // cyan → bright cyan → white highlights
+      highlightChance: 0.05,
+      updateEvery: 1,
+    }),
+    [isMobile]
+  );
+
+  const bgCfg: LayerConfig = useMemo(
+    () => ({
+      cols: isMobile ? 90 : 150,
+      rows: isMobile ? 44 : 76,
+      spacingX: 0.18,
+      spacingZ: 0.22,
+      speed: 0.55,
+      amp: 1.6,
+      yOffset: -1.4,
+      size: 0.05,
+      opacity: 0.3,
+      palette: ["#173bab", "#4f46e5", "#3b82f6"], // royal blue → indigo → blue
+      highlightChance: 0.03,
+      updateEvery: 2,
+    }),
+    [isMobile]
+  );
+
+  // Keep the DOM node (and its ref) stable before the Canvas mounts client-side
+  if (!mounted) return <div ref={containerRef} className="absolute inset-0" />;
+
   return (
-    <div className="absolute inset-0">
+    <div ref={containerRef} className="absolute inset-0">
       <Canvas
         camera={{ position: [0, 3.2, 12], fov: 62, near: 0.1, far: 80 }}
         gl={{ antialias: false, alpha: true }}
         dpr={[1, 1.5]}
+        frameloop={frameloop}
       >
         <fog attach="fog" args={["#060b18", 8, 28]} />
-        <LiquiditySurface />
+        {/* Background depth field first, foreground on top */}
+        <WaveLayer cfg={bgCfg} />
+        <WaveLayer cfg={fgCfg} />
       </Canvas>
 
       {/* Framer Motion SVG organic flow field */}
-      <SvgFlowLayer />
+      <SvgFlowLayer animate={!reduced} />
 
       {/* CRT scanline grain */}
       <div
