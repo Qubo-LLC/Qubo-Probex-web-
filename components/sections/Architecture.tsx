@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import { staggerContainer, cardReveal, cardHover, defaultViewport } from "@/components/ui/motion";
 
 /* ─── INLINE SVG DIAGRAMS ───────────────────────────────────────────── */
 
@@ -251,115 +252,109 @@ const LAYERS = [
   },
 ];
 
-/* ─── SPOTLIGHT CARD ─────────────────────────────────────────────── */
-function LayerCard({ layer, i }: { layer: typeof LAYERS[0]; i: number }) {
+/* ─── SPOTLIGHT CARD — reference glass card for all landing sections ──── */
+function LayerCard({ layer }: { layer: typeof LAYERS[0] }) {
   const Diagram = layer.diagram;
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
 
   return (
-    <Reveal delay={i * 0.1}>
+    <motion.div
+      ref={ref}
+      variants={cardReveal}
+      whileHover={cardHover(layer.accent)}
+      className="glass-card surface-highlight relative overflow-hidden gpu h-full"
+      onMouseMove={(e) => {
+        const r = ref.current?.getBoundingClientRect();
+        if (r) setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Cursor spotlight — single-source hover lighting */}
       <div
-        ref={ref}
-        className="relative rounded-xl overflow-hidden gpu transition-colors duration-250 h-full"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
         style={{
-          background: "rgba(11,16,32,0.72)",
-          border: `1px solid rgba(148,163,184,0.07)`,
+          opacity: hovered ? 1 : 0,
+          background: `radial-gradient(300px circle at ${pos.x}px ${pos.y}px, ${layer.glowColor}, transparent 65%)`,
         }}
-        onMouseMove={(e) => {
-          const r = ref.current?.getBoundingClientRect();
-          if (r) setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
-        }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => { setHovered(false); (ref.current as HTMLElement).style.borderColor = "rgba(148,163,184,0.07)"; }}
-        onMouseOver={(e) => (e.currentTarget.style.borderColor = `${layer.accent}28`)}
-        onMouseOut={(e)  => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.07)")}
-      >
-        {/* Spotlight radial */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-          style={{
-            opacity: hovered ? 1 : 0,
-            background: `radial-gradient(280px circle at ${pos.x}px ${pos.y}px, ${layer.glowColor}, transparent 65%)`,
-          }}
-        />
+      />
 
-        <div className="relative z-10 p-6 flex flex-col h-full">
-          {/* Index + tag */}
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider"
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                background: `${layer.accent}14`,
-                border: `1px solid ${layer.accent}30`,
-                color: layer.accent,
-              }}
-            >
-              {layer.index}
-            </span>
-            <span
-              className="text-[9px] tracking-[0.2em] uppercase"
-              style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)" }}
-            >
-              {layer.tag}
-            </span>
-          </div>
-
-          {/* SVG diagram */}
-          <div
-            className="rounded-lg mb-5 overflow-hidden px-3 py-2"
+      <div className="relative z-10 p-7 flex flex-col h-full">
+        {/* Index + tag */}
+        <div className="flex items-center gap-3 mb-5">
+          <span
+            className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider"
             style={{
-              background: "rgba(6,11,24,0.6)",
-              border: "1px solid rgba(148,163,184,0.05)",
-              minHeight: 96,
+              fontFamily: "var(--font-mono-stack)",
+              background: `${layer.accent}14`,
+              border: `1px solid ${layer.accent}30`,
+              color: layer.accent,
             }}
           >
-            <Diagram />
-          </div>
-
-          {/* Title */}
-          <h3
-            className="text-sm font-bold mb-2 leading-snug"
-            style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-primary)", letterSpacing: "-0.01em" }}
+            {layer.index}
+          </span>
+          <span
+            className="text-[9px] tracking-[0.2em] uppercase"
+            style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-muted)" }}
           >
-            {layer.title}
-          </h3>
+            {layer.tag}
+          </span>
+        </div>
 
-          {/* Description */}
-          <p
-            className="text-xs leading-relaxed mb-5 flex-1"
-            style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)", fontWeight: 400 }}
-          >
-            {layer.desc}
-          </p>
+        {/* SVG diagram */}
+        <div
+          className="rounded-lg mb-6 overflow-hidden px-3 py-2"
+          style={{
+            background: "rgba(6,11,24,0.6)",
+            border: "1px solid rgba(148,163,184,0.05)",
+            minHeight: 96,
+          }}
+        >
+          <Diagram />
+        </div>
 
-          {/* Stats */}
-          <div
-            className="grid grid-cols-3 gap-2 pt-4"
-            style={{ borderTop: "1px solid rgba(148,163,184,0.05)" }}
-          >
-            {layer.stats.map((s, j) => (
-              <div key={j}>
-                <p
-                  className="text-[8px] tracking-[0.16em] uppercase mb-0.5"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-muted)" }}
-                >
-                  {s.label}
-                </p>
-                <p
-                  className="text-xs font-semibold"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", color: layer.accent }}
-                >
-                  {s.value}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* Title */}
+        <h3
+          className="text-base font-bold mb-2.5 leading-snug"
+          style={{ fontFamily: "var(--font-heading-stack)", color: "var(--text-primary)", letterSpacing: "-0.015em" }}
+        >
+          {layer.title}
+        </h3>
+
+        {/* Description */}
+        <p
+          className="text-[13px] leading-relaxed mb-6 flex-1"
+          style={{ fontFamily: "var(--font-heading-stack)", color: "var(--text-secondary)", fontWeight: 400 }}
+        >
+          {layer.desc}
+        </p>
+
+        {/* Stats */}
+        <div
+          className="grid grid-cols-3 gap-2 pt-5"
+          style={{ borderTop: "1px solid rgba(148,163,184,0.06)" }}
+        >
+          {layer.stats.map((s, j) => (
+            <div key={j}>
+              <p
+                className="text-[8px] tracking-[0.16em] uppercase mb-1"
+                style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-muted)" }}
+              >
+                {s.label}
+              </p>
+              <p
+                className="text-[13px] font-semibold"
+                style={{ fontFamily: "var(--font-mono-stack)", color: layer.accent }}
+              >
+                {s.value}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
-    </Reveal>
+    </motion.div>
   );
 }
 
@@ -400,11 +395,17 @@ export default function Architecture() {
         </Reveal>
 
         {/* ── 3-LAYER GRID ── */}
-        <div className="grid md:grid-cols-3 gap-5">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={defaultViewport}
+          className="grid md:grid-cols-3 gap-6"
+        >
           {LAYERS.map((layer, i) => (
-            <LayerCard key={i} layer={layer} i={i} />
+            <LayerCard key={i} layer={layer} />
           ))}
-        </div>
+        </motion.div>
 
         {/* ── SYSTEM DIAGRAM CONNECTOR ── */}
         <motion.div
