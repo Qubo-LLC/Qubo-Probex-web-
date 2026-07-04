@@ -21,6 +21,13 @@ const LIVE_STATS = [
   { label: "Markets",    value: "840+"    },
 ];
 
+/* Ambient engine-health readout — native Probex telemetry, not decorative */
+const ENGINE_STATUS = [
+  { label: "Consensus",      value: "99.42%" },
+  { label: "Latency",        value: "< 90ms" },
+  { label: "Active Markets", value: "840"    },
+];
+
 export default function Hero() {
   const { scrollY }     = useScroll();
   const waveY           = useTransform(scrollY, [0, 600], [0, 90]);
@@ -118,23 +125,40 @@ export default function Hero() {
           </span>
         </motion.div>
 
-        {/* HEADLINE */}
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.18 }}
-          style={{
-            fontFamily: "Manrope, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(3.2rem, 10vw, 7.5rem)",
-            letterSpacing: "-0.03em",
-            lineHeight: 0.94,
-          }}
-        >
-          <span className="text-gradient-white">QUBO</span>
-          <br />
-          <span className="text-gradient-probex">Probex</span>
-        </motion.h1>
+        {/* HEADLINE + soft radial light for depth (peak ~15% opacity) */}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="absolute left-1/2 top-1/2 pointer-events-none"
+            style={{
+              width: 640,
+              height: 340,
+              transform: "translate(-50%, -50%)",
+              background:
+                "radial-gradient(ellipse at center, rgba(0,229,255,0.15) 0%, rgba(23,59,171,0.10) 42%, transparent 72%)",
+              filter: "blur(64px)",
+              zIndex: 0,
+            }}
+          />
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.18 }}
+            style={{
+              position: "relative",
+              zIndex: 1,
+              fontFamily: "var(--font-heading-stack)",
+              fontWeight: 800,
+              fontSize: "clamp(3.2rem, 10vw, 7.5rem)",
+              letterSpacing: "-0.03em",
+              lineHeight: 0.94,
+            }}
+          >
+            <span className="text-gradient-white">QUBO</span>
+            <br />
+            <span className="text-gradient-probex">Probex</span>
+          </motion.h1>
+        </div>
 
         {/* SUBHEADLINE */}
         <motion.p
@@ -208,12 +232,7 @@ export default function Hero() {
             <motion.span
               whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(0,229,255,0.32), 0 0 80px rgba(124,58,237,0.14)" }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-sm font-bold tracking-wide cursor-pointer gpu"
-              style={{
-                fontFamily: "Manrope, sans-serif",
-                background: "linear-gradient(135deg, #00e5ff 0%, #0ea5e9 50%, #7c3aed 100%)",
-                color: "#060b18",
-              }}
+              className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-sm tracking-wide gpu"
             >
               Access Probex
               <ExternalLink size={13} />
@@ -222,22 +241,58 @@ export default function Hero() {
 
           {/* Secondary */}
           <motion.button
-            whileHover={{ borderColor: "rgba(0,229,255,0.38)", color: "var(--text-primary)" }}
             whileTap={{ scale: 0.97 }}
             onClick={() => document.getElementById("pipeline")?.scrollIntoView({ behavior: "smooth" })}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-sm font-medium gpu transition-all duration-200"
-            style={{
-              fontFamily: "Manrope, sans-serif",
-              border: "1px solid rgba(148,163,184,0.14)",
-              color: "var(--text-secondary)",
-              background: "transparent",
-            }}
+            className="btn-glass inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-sm gpu"
           >
             Explore the engine
             <ArrowRight size={13} />
           </motion.button>
         </motion.div>
       </motion.div>
+
+      {/* ── PROBEX ENGINE STATUS — ambient telemetry (lg+) ── */}
+      <motion.aside
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 1.1 }}
+        aria-label="Probex engine status"
+        className="hidden lg:block absolute bottom-10 left-10 z-10 glass-panel rounded-lg px-4 py-3.5"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-1.5 h-1.5 rounded-full animate-data-blink" style={{ background: "#22c55e" }} />
+          <span
+            className="text-[8px] tracking-[0.28em] uppercase"
+            style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-secondary)" }}
+          >
+            Probex Engine
+          </span>
+          <span
+            className="text-[8px] tracking-[0.24em] uppercase"
+            style={{ fontFamily: "var(--font-mono-stack)", color: "#22c55e" }}
+          >
+            Live
+          </span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {ENGINE_STATUS.map((s) => (
+            <div key={s.label} className="flex items-center justify-between gap-8">
+              <span
+                className="text-[9px] tracking-[0.16em] uppercase"
+                style={{ fontFamily: "var(--font-mono-stack)", color: "var(--text-muted)" }}
+              >
+                {s.label}
+              </span>
+              <span
+                className="text-[10px] font-semibold tabular-nums"
+                style={{ fontFamily: "var(--font-mono-stack)", color: "var(--cyan-dim)" }}
+              >
+                {s.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </motion.aside>
 
       {/* ── SCROLL INDICATOR ── */}
       <motion.div
