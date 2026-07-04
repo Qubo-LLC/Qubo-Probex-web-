@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import SuperCoreVisual from "@/components/ui/SuperCoreVisual";
 
 /* ─── MATHEMATICAL FRAMEWORKS ────────────────────────────────────────── */
 const FRAMEWORKS = [
@@ -171,6 +172,21 @@ export default function SuperCore() {
               Probex's predictive accuracy rests on four interlocking mathematical
               frameworks — chosen for their formal guarantees, not their familiarity.
               Every layer can be independently audited against its specification.
+            </p>
+          </div>
+        </Reveal>
+
+        {/* ── SUPER-CORE VISUALIZATION ── */}
+        <Reveal delay={0.05}>
+          <div className="relative mb-16 flex flex-col items-center">
+            <SuperCoreVisual />
+            <p
+              className="mt-6 text-center max-w-md text-[13px] leading-relaxed"
+              style={{ fontFamily: "var(--font-heading-stack)", color: "var(--text-secondary)" }}
+            >
+              A single deterministic core executes every framework below in
+              lockstep — consensus, calibration, and attribution resolved on one
+              clock, at institutional throughput.
             </p>
           </div>
         </Reveal>
