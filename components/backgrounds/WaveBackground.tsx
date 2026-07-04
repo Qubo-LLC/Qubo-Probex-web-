@@ -25,6 +25,7 @@ interface LayerConfig {
   palette: [string, string, string]; // [low, mid, highlight]
   highlightChance: number;            // fraction of points lifted toward highlight
   updateEvery: number;                // JS position recompute cadence (1 = every frame)
+  shimmer?: boolean;                  // subtle global opacity breathing
 }
 
 /* Original displacement — factored out so both layers share identical math */
@@ -39,9 +40,10 @@ function displace(x: number, z: number, t: number): number {
 
 function WaveLayer({ cfg }: { cfg: LayerConfig }) {
   const ref = useRef<THREE.Points>(null!);
+  const matRef = useRef<THREE.PointsMaterial>(null!);
   const {
     cols, rows, spacingX, spacingZ, speed, amp, yOffset,
-    size, opacity, palette, highlightChance, updateEvery,
+    size, opacity, palette, highlightChance, updateEvery, shimmer,
   } = cfg;
 
   // Resting geometry — pre-displaced at t=0 so a paused/reduced-motion frame
@@ -84,6 +86,11 @@ function WaveLayer({ cfg }: { cfg: LayerConfig }) {
   const frameRef = useRef(0);
 
   useFrame(({ clock }) => {
+    // Subtle shimmer — gentle opacity breathing (cheap, one value/frame)
+    if (shimmer && matRef.current) {
+      matRef.current.opacity = opacity * (0.9 + 0.1 * Math.sin(clock.elapsedTime * 1.1));
+    }
+
     frameRef.current += 1;
     if (updateEvery > 1 && frameRef.current % updateEvery !== 0) return;
 
@@ -102,6 +109,7 @@ function WaveLayer({ cfg }: { cfg: LayerConfig }) {
   return (
     <Points ref={ref} positions={positions} colors={colors} stride={3}>
       <PointMaterial
+        ref={matRef}
         vertexColors
         size={size}
         sizeAttenuation
@@ -229,18 +237,21 @@ export default function WaveBackground() {
 
   const fgCfg: LayerConfig = useMemo(
     () => ({
-      cols: isMobile ? 120 : 200,
-      rows: isMobile ? 56 : 96,
-      spacingX: 0.13,
-      spacingZ: 0.18,
+      cols: isMobile ? 132 : 224,
+      rows: isMobile ? 60 : 104,
+      spacingX: 0.12,
+      spacingZ: 0.17,
       speed: 1.05,
       amp: 1.0,
       yOffset: 0,
-      size: 0.045,
-      opacity: 0.8,
-      palette: ["#00e5ff", "#22d3ee", "#eafaff"], // cyan → bright cyan → white highlights
-      highlightChance: 0.05,
+      size: 0.05,
+      opacity: 0.85,
+      // Predominantly cyan: highlights are bright CYAN (low red) so additive
+      // overlaps saturate toward cyan, not white.
+      palette: ["#00cfff", "#22e5ff", "#7ff2ff"],
+      highlightChance: 0.08,
       updateEvery: 1,
+      shimmer: true,
     }),
     [isMobile]
   );
@@ -251,11 +262,11 @@ export default function WaveBackground() {
       rows: isMobile ? 44 : 76,
       spacingX: 0.18,
       spacingZ: 0.22,
-      speed: 0.55,
-      amp: 1.6,
+      speed: 0.45,
+      amp: 1.65,
       yOffset: -1.4,
       size: 0.05,
-      opacity: 0.3,
+      opacity: 0.22,
       palette: ["#173bab", "#4f46e5", "#3b82f6"], // royal blue → indigo → blue
       highlightChance: 0.03,
       updateEvery: 2,
