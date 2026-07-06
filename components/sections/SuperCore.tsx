@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import SuperCoreVisual from "@/components/ui/SuperCoreVisual";
 
@@ -139,13 +139,47 @@ function MathGrid({ accent }: { accent: string }) {
   );
 }
 
+/* ─── AUTO-CYCLE TIMING ──────────────────────────────────────────────── */
+const AUTO_ADVANCE_MS = 6000;   // dwell time per framework
+const RESUME_DELAY_MS = 12000;  // hold after a manual selection before resuming
+
 /* ─── COMPONENT ──────────────────────────────────────────────────────── */
 export default function SuperCore() {
   const [active, setActive] = useState(0);
   const fw = FRAMEWORKS[active];
+  const reduced = useReducedMotion();
+
+  // Hover state and last-interaction timestamp live in refs so the interval
+  // is created once and never restarts mid-cycle.
+  const hoveredRef = useRef(false);
+  const lastInteractionRef = useRef(0);
+
+  // Manual selection (tabs + dots) — pauses auto-cycling for RESUME_DELAY_MS
+  const select = (i: number) => {
+    lastInteractionRef.current = Date.now();
+    setActive(i);
+  };
+
+  // Infinite auto-cycle: advances every AUTO_ADVANCE_MS unless the section is
+  // hovered or a manual selection happened recently. Disabled under
+  // prefers-reduced-motion, matching the site's other carousels.
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => {
+      if (hoveredRef.current) return;
+      if (Date.now() - lastInteractionRef.current < RESUME_DELAY_MS) return;
+      setActive((a) => (a + 1) % FRAMEWORKS.length);
+    }, AUTO_ADVANCE_MS);
+    return () => clearInterval(id);
+  }, [reduced]);
 
   return (
-    <section id="supercore" className="py-28 scroll-mt-20 relative overflow-hidden">
+    <section
+      id="supercore"
+      className="py-28 scroll-mt-20 relative overflow-hidden"
+      onMouseEnter={() => (hoveredRef.current = true)}
+      onMouseLeave={() => (hoveredRef.current = false)}
+    >
 
       <div className="max-w-6xl mx-auto px-6">
 
@@ -197,7 +231,8 @@ export default function SuperCore() {
             {FRAMEWORKS.map((f, i) => (
               <button
                 key={f.id}
-                onClick={() => setActive(i)}
+                onClick={() => select(i)}
+                aria-pressed={active === i}
                 className="px-4 py-2 rounded-md text-xs tracking-widest uppercase transition-all duration-200 gpu"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -360,7 +395,7 @@ export default function SuperCore() {
           {FRAMEWORKS.map((f, i) => (
             <button
               key={f.id}
-              onClick={() => setActive(i)}
+              onClick={() => select(i)}
               className="transition-all duration-200 rounded-full gpu"
               style={{
                 width: active === i ? 20 : 6,

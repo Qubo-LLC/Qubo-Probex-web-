@@ -37,8 +37,11 @@ function FooterCol({ heading, links }: { heading: string; links: string[] }) {
 
 export default function Footer() {
   return (
+    // shrink-0: the footer is a flex item of the body column and overflow-hidden
+    // zeroes its automatic minimum size — without this, any fixed body height
+    // lets flexbox collapse the footer to its 1px border.
     <footer
-      className="relative z-10 overflow-hidden"
+      className="relative z-10 overflow-hidden shrink-0"
       style={{ borderTop: "1px solid var(--border-subtle)" }}
     >
       {/* Top glow */}
