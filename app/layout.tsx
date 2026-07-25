@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import Script from "next/script"; 
 
 /* ── SELF-HOSTED FONTS (next/font) ──────────────────────────────────────
    Exposed as CSS variables so components consume --font-heading / --font-mono.
@@ -38,9 +39,22 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${jetbrainsMono.variable} antialiased`}>
+  <html lang="en" className={`${manrope.variable} ${jetbrainsMono.variable} antialiased`}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-HWZ6ZBSWJC"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-HWZ6ZBSWJC');
+          `}
+        </Script>
+      </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-base)]">
-
         {/* ── AMBIENT RADIAL LAYERS ── */}
         <div
           aria-hidden="true"
