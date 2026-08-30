@@ -7,6 +7,24 @@ const W = 320;
 const H = 70;
 const PAD = 6;
 
+/* Deterministic pseudo-random starting series in the same 30–70 band the
+   original Math.random() call produced — a pure function of the point index,
+   so it is stable across renders and identical on server and client.
+
+   Integer ops only. A sin-based hash is NOT safe here: ECMAScript leaves the
+   precision of Math.sin implementation-defined, so Node and the browser differ
+   by a few ULP and the scaling amplifies that into a hydration mismatch. */
+function hashNoise(seed: number): number {
+  let h = Math.imul(seed ^ 0x9e3779b9, 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  h = h ^ (h >>> 16);
+  return (h >>> 0) / 4294967296;
+}
+
+function initialSeries(): number[] {
+  return Array.from({ length: POINT_COUNT }, (_, i) => 30 + hashNoise(i) * 40);
+}
+
 function buildPath(data: number[]) {
   const pts = data.map((v, i) => {
     const x = PAD + (i / (POINT_COUNT - 1)) * (W - PAD * 2);
@@ -28,24 +46,16 @@ function buildPath(data: number[]) {
 }
 
 export default function MiniChart() {
-  const [data, setData] = useState<number[] | null>(null);
+  // Deterministic seed series, so server and client render identical markup.
+  // The previous code randomised inside a mount effect purely to dodge a
+  // hydration mismatch; making the initial series pure removes the mismatch
+  // itself, along with the extra render and the null placeholder frame.
+  const [data, setData] = useState<number[]>(initialSeries);
 
-  // ✅ ONLY RUN ON CLIENT (fixes hydration)
+  // Live animation. Randomness here is fine: it runs on a timer, not in render.
   useEffect(() => {
-    const initial = Array.from(
-      { length: POINT_COUNT },
-      () => 30 + Math.random() * 40
-    );
-    setData(initial);
-  }, []);
-
-  // ✅ animation loop (only runs after mount)
-  useEffect(() => {
-    if (!data) return;
-
     const id = setInterval(() => {
       setData((prev) => {
-        if (!prev) return prev;
         const last = prev[prev.length - 1];
         const next = Math.max(
           10,
@@ -56,10 +66,7 @@ export default function MiniChart() {
     }, 1400);
 
     return () => clearInterval(id);
-  }, [data]);
-
-  // 🚫 prevent server/client mismatch
-  if (!data) return null;
+  }, []);
 
   const { polyline, area, lastX, lastY } = buildPath(data);
 

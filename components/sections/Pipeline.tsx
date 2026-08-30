@@ -283,7 +283,7 @@ export default function Pipeline() {
             className="max-w-lg text-sm leading-relaxed mb-16"
             style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
           >
-            Probex's four-stage processing architecture transforms noisy, multi-origin
+            Probex&apos;s four-stage processing architecture transforms noisy, multi-origin
             predictive feeds into cryptographically finalised consensus states in under
             90 milliseconds end-to-end.
           </p>

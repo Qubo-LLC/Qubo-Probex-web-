@@ -1,2 +1,10 @@
 node_modules
 .next/
+
+# local env files (values must never be committed)
+.env
+.env.*
+!.env.example
+
+# TypeScript incremental build cache
+*.tsbuildinfo
