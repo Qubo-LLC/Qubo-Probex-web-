@@ -3,7 +3,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useMemo, useState, useEffect, useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 /* ─── LAYER CONFIG ───────────────────────────────────────────────────────
@@ -27,6 +27,37 @@ interface LayerConfig {
   updateEvery: number;                // JS position recompute cadence (1 = every frame)
   shimmer?: boolean;                  // subtle global opacity breathing
 }
+
+/* Deterministic per-point pseudo-random in [0, 1).
+   Replaces Math.random() in the colour buffer so `colors` is a pure function
+   of the layer config: identical on server and client, and stable if React
+   re-runs or discards the memo. Same distribution as before, fixed sample. */
+function hashNoise(seed: number): number {
+  let h = Math.imul(seed ^ 0x9e3779b9, 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  h = h ^ (h >>> 16);
+  return (h >>> 0) / 4294967296;
+}
+
+/* External browser state read through useSyncExternalStore rather than copied
+   into React state inside an effect: correct on the first client render, and
+   no cascading re-render on mount. */
+const MOBILE_QUERY = "(max-width: 767px)";
+
+const subscribeNever = () => () => {};
+
+function subscribeMobile(onChange: () => void) {
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+const getIsMobile = () => window.matchMedia(MOBILE_QUERY).matches;
+
+function subscribeVisibility(onChange: () => void) {
+  document.addEventListener("visibilitychange", onChange);
+  return () => document.removeEventListener("visibilitychange", onChange);
+}
+const getDocVisible = () => !document.hidden;
 
 /* Original displacement — factored out so both layers share identical math */
 function displace(x: number, z: number, t: number): number {
@@ -74,8 +105,9 @@ function WaveLayer({ cfg }: { cfg: LayerConfig }) {
       const tx = cols > 1 ? x / (cols - 1) : 0;
       const base = cLow.clone().lerp(cMid, tx);
       for (let z = 0; z < rows; z++) {
-        const c = base.clone().multiplyScalar(0.82 + Math.random() * 0.18);
-        if (Math.random() < highlightChance) c.lerp(cHigh, 0.6);
+        const n = x * rows + z;
+        const c = base.clone().multiplyScalar(0.82 + hashNoise(n) * 0.18);
+        if (hashNoise(n + 0x9e37) < highlightChance) c.lerp(cHigh, 0.6);
         arr[i] = c.r; arr[i + 1] = c.g; arr[i + 2] = c.b;
         i += 3;
       }
@@ -196,25 +228,15 @@ export default function WaveBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  const [mounted, setMounted] = useState(false);
-  const [inView, setInView] = useState(true);
-  const [docVisible, setDocVisible] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  // Hydration gate: false on the server and during hydration, true afterwards.
+  const mounted = useSyncExternalStore(subscribeNever, () => true, () => false);
 
-  // Mount, responsive density, document-visibility
-  useEffect(() => {
-    setMounted(true);
-    const mq = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mq.matches);
-    const onMq = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    const onVis = () => setDocVisible(!document.hidden);
-    mq.addEventListener("change", onMq);
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      mq.removeEventListener("change", onMq);
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, []);
+  // inView is driven by an IntersectionObserver callback, so it stays as state.
+  const [inView, setInView] = useState(true);
+
+  // Live browser state, subscribed rather than mirrored into state on mount.
+  const docVisible = useSyncExternalStore(subscribeVisibility, getDocVisible, () => true);
+  const isMobile = useSyncExternalStore(subscribeMobile, getIsMobile, () => false);
 
   // Pause render loop when the hero scrolls out of view
   useEffect(() => {

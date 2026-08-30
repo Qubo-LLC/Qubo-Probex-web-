@@ -142,7 +142,7 @@ export default function Footer() {
             className="text-[10px] tracking-[0.2em]"
             style={{ color: "rgba(0,229,255,0.15)", fontFamily: "'JetBrains Mono', monospace" }}
           >
-            PROBEX::CONSENSUS_ENGINE::v3.2.1
+            PROBEX::CONSENSUS ENGINE
           </p>
         </div>
       </div>

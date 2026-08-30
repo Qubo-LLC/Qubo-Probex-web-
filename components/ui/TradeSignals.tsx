@@ -85,7 +85,11 @@ export default function TradeSignals() {
         ctx.beginPath();
         signal.points.forEach((p, i) => {
           const y = p.y + Math.sin(t * signal.speed + signal.phase + i * 0.28) * (H * 0.06);
-          i === 0 ? ctx.moveTo(p.x, y) : ctx.lineTo(p.x, y);
+          if (i === 0) {
+            ctx.moveTo(p.x, y);
+          } else {
+            ctx.lineTo(p.x, y);
+          }
         });
         ctx.strokeStyle = col.glow;
         ctx.lineWidth = 3;
@@ -97,7 +101,11 @@ export default function TradeSignals() {
         ctx.beginPath();
         signal.points.forEach((p, i) => {
           const y = p.y + Math.sin(t * signal.speed + signal.phase + i * 0.28) * (H * 0.06);
-          i === 0 ? ctx.moveTo(p.x, y) : ctx.lineTo(p.x, y);
+          if (i === 0) {
+            ctx.moveTo(p.x, y);
+          } else {
+            ctx.lineTo(p.x, y);
+          }
         });
         ctx.strokeStyle = col.stroke;
         ctx.lineWidth = 1.2;

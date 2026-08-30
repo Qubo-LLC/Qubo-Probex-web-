@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import SuperCoreVisual from "@/components/ui/SuperCoreVisual";
 
@@ -155,10 +155,12 @@ export default function SuperCore() {
   const lastInteractionRef = useRef(0);
 
   // Manual selection (tabs + dots) — pauses auto-cycling for RESUME_DELAY_MS
-  const select = (i: number) => {
+  // useCallback keeps this out of the render path: the body only ever runs
+  // from an event handler, so reading the clock is not a render-phase effect.
+  const select = useCallback((i: number) => {
     lastInteractionRef.current = Date.now();
     setActive(i);
-  };
+  }, []);
 
   // Infinite auto-cycle: advances every AUTO_ADVANCE_MS unless the section is
   // hovered or a manual selection happened recently. Disabled under
@@ -203,7 +205,7 @@ export default function SuperCore() {
               className="text-sm leading-relaxed"
               style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
             >
-              Probex's predictive accuracy rests on four interlocking mathematical
+              Probex&apos;s predictive accuracy rests on four interlocking mathematical
               frameworks — chosen for their formal guarantees, not their familiarity.
               Every layer can be independently audited against its specification.
             </p>
