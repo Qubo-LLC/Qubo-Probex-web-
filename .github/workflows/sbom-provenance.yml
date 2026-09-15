@@ -1,0 +1,147 @@
+# =============================================================================
+# .github/workflows/sbom-provenance.yml
+#
+# Runs on every push/PR to main. Produces two things:
+#   1. An SBOM (Software Bill of Materials) — a complete list of every
+#      dependency this app uses, in SPDX format.
+#   2. A signed SLSA provenance attestation for the build output — proof
+#      of exactly which commit/workflow produced it.
+#
+# NOTE: This repo has no Dockerfile / container image (confirmed via repo
+# audit, Sept 2026), so this uses SLSA's "generic artifact" track instead
+# of the container-image track. Cosign container signing is deferred until
+# containerization happens — see SBOM-SIGNING-EVALUATION.md for details.
+#
+# Verified SHAs/tags (resolved via gh api, Sept 2026):
+#   anchore/sbom-action@274555f23948494da9248b45cbd44ad133002e12
+#   actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+#   slsa-framework/slsa-github-generator@v2.1.0
+# =============================================================================
+
+name: SBOM & Provenance
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # JOB 1: Generate SBOM
+  # Lists every dependency this app uses, in SPDX format.
+  # ---------------------------------------------------------------------------
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      sbom-generated: ${{ steps.generate.outcome == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          persist-credentials: false
+
+      - name: Generate SBOM (SPDX format)
+        id: generate
+        uses: anchore/sbom-action@274555f23948494da9248b45cbd44ad133002e12 # v0.17.x
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM as build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.x
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+  # ---------------------------------------------------------------------------
+  # JOB 2: Build and package artifact
+  # Actually builds the app, then packages the output into a single file
+  # (build-artifact.tar.gz) so the next job has something concrete to
+  # attest to — standing in for what would normally be a container image.
+  # ---------------------------------------------------------------------------
+  build-artifact:
+    name: Build and package artifact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      digest: ${{ steps.hash.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package build output
+        run: tar -czf build-artifact.tar.gz .next
+
+      - name: Generate checksum digest
+        id: hash
+        run: |
+          DIGEST=$(sha256sum build-artifact.tar.gz | awk '{print $1}')
+          echo "digest=sha256:${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "${DIGEST}  build-artifact.tar.gz" > build-artifact.tar.gz.sha256
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.x
+        with:
+          name: build-artifact
+          path: |
+            build-artifact.tar.gz
+            build-artifact.tar.gz.sha256
+
+  # ---------------------------------------------------------------------------
+  # JOB 3: SLSA provenance attestation
+  # Generates a signed statement proving exactly which commit/workflow run
+  # produced build-artifact.tar.gz. Uses SLSA's generic-artifact reusable
+  # workflow since there's no container image to attest to instead.
+  # ---------------------------------------------------------------------------
+  provenance:
+    name: Generate SLSA provenance
+    needs: [build-artifact]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      base64-subjects: "${{ needs.build-artifact.outputs.digest }}"
+
+# =============================================================================
+# NEXT STEPS:
+#
+# 1. Confirm the slsa-github-generator input contract matches v2.1.0's
+#    current docs before merging — reusable workflow interfaces can shift
+#    between releases, and base64-subjects may need pre-encoding rather
+#    than a raw digest string. Check:
+#    https://github.com/slsa-framework/slsa-github-generator
+#
+# 2. Run zizmor .github/workflows/sbom-provenance.yml locally.
+#
+# 3. Push, open PR, confirm all 3 jobs run and pass.
+#
+# 4. Once containerization happens (tracked separately), add:
+#    - Docker build + push to a registry
+#    - Cosign keyless signing (OIDC) of the resulting image
+#    - Switch this file's provenance job to SLSA's container track
+#      instead of the generic-artifact track used here
+# =============================================================================
