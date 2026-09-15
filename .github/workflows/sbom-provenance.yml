@@ -122,7 +122,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] -- SLSA generator must be tag-pinned; its OIDC/Sigstore trust chain and internal path resolution depend on the release tag, not a raw commit SHA. See https://github.com/slsa-framework/slsa-github-generator
     with:
       base64-subjects: "${{ needs.build-artifact.outputs.digest }}"
 
