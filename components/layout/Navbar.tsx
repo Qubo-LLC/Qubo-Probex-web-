@@ -18,7 +18,7 @@ const NAV_LINKS = [
 
 const SPY_IDS = ["home", ...NAV_LINKS.map((l) => l.id)];
 
-const PROBEX_URL = process.env.NEXT_PUBLIC_PROBEX_URL ?? "#";
+const SYNATRA_URL = process.env.NEXT_PUBLIC_SYNATRA_URL ?? "#";
 
 function NavLink({ name, active, onClick }: { name: string; active: boolean; onClick: () => void }) {
   return (
@@ -105,7 +105,7 @@ export default function Navbar() {
                 background: "rgba(0,229,255,0.06)",
               }}
             >
-              PROBEX
+              SYNATRA
             </span>
           </button>
 
@@ -124,13 +124,13 @@ export default function Navbar() {
           {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-3">
             {/* Platform access CTA */}
-            <a href={PROBEX_URL} target="_blank" rel="noopener noreferrer">
+            <a href={SYNATRA_URL} target="_blank" rel="noopener noreferrer">
               <motion.span
                 whileHover={{ scale: 1.04, boxShadow: "0 0 24px rgba(0,229,255,0.32)" }}
                 whileTap={{ scale: 0.96 }}
                 className="btn-primary hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs tracking-widest uppercase gpu"
               >
-                Access Probex
+                Access Synatra
                 <ExternalLink size={11} />
               </motion.span>
             </a>
@@ -176,9 +176,9 @@ export default function Navbar() {
               {item.name}
             </button>
           ))}
-          <a href={PROBEX_URL} target="_blank" rel="noopener noreferrer">
+          <a href={SYNATRA_URL} target="_blank" rel="noopener noreferrer">
             <span className="btn-primary flex items-center justify-center gap-2 mt-3 py-3 rounded-lg text-xs tracking-widest uppercase">
-              Access Probex <ExternalLink size={11} />
+              Access Synatra <ExternalLink size={11} />
             </span>
           </a>
         </div>

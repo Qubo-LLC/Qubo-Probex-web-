@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // Silence cross-origin dev warning from Three.js canvas
   allowedDevOrigins: [
     "136.119.171.6",
-    "qubo-probex.duckdns.org",
+    "qubo-synatra.duckdns.org",
   ],
 
   images: {

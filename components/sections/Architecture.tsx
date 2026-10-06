@@ -212,7 +212,7 @@ const LAYERS = [
     index: "L1",
     tag: "CONSENSUS VERIFICATION",
     title: "Distributed Truth Resolution",
-    desc: "Multi-node quorum validation with cryptographic finality. Probex resolves contested event states by aggregating validator votes against deviation bounds, rejecting outliers, and committing only when a configurable quorum threshold is met.",
+    desc: "Multi-node quorum validation with cryptographic finality. Synatra resolves contested event states by aggregating validator votes against deviation bounds, rejecting outliers, and committing only when a configurable quorum threshold is met.",
     diagram: DiagramConsensus,
     stats: [
       { label: "Quorum threshold", value: "67%"   },
@@ -226,7 +226,7 @@ const LAYERS = [
     index: "L2",
     tag: "COMPLIANCE GUARDRAILS",
     title: "In-Band Regulatory Layer",
-    desc: "Jurisdiction rules, position caps, mandatory reporting, and KYC/AML hooks are evaluated inline — never as a post-process. Probex supports 47 regulatory frameworks with live rule updates and full immutable audit trail per state transition.",
+    desc: "Jurisdiction rules, position caps, mandatory reporting, and KYC/AML hooks are evaluated inline — never as a post-process. Synatra supports 47 regulatory frameworks with live rule updates and full immutable audit trail per state transition.",
     diagram: DiagramCompliance,
     stats: [
       { label: "Frameworks",    value: "47"    },
@@ -368,7 +368,7 @@ export default function Architecture() {
         <Reveal>
           <div className="grid md:grid-cols-2 gap-10 items-end mb-16">
             <div>
-              <p className="label-tag mb-4">[ PROBEX ARCHITECTURE ]</p>
+              <p className="label-tag mb-4">[ SYNATRA ARCHITECTURE ]</p>
               <h2
                 className="text-gradient-white"
                 style={{
@@ -386,7 +386,7 @@ export default function Architecture() {
               className="text-sm leading-relaxed"
               style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
             >
-              Probex separates concerns into three independently verifiable layers —
+              Synatra separates concerns into three independently verifiable layers —
               consensus, compliance, and liquidity — each with its own failure domain,
               latency budget, and monitoring surface. They compose to produce a single,
               auditable predictive market infrastructure.

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/* ─── PROBEX SUPER-CORE ────────────────────────────────────────────────────
+/* ─── SYNATRA SUPER-CORE ────────────────────────────────────────────────────
    Original visualization (not a copy of the reference art): concentric rings,
    rotating conic light-sweeps for procedural lighting, orbiting nodes, layered
    radial bloom, and a pulsing core. All motion is CSS/transform-based (no

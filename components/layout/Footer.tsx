@@ -2,11 +2,11 @@
 
 import { ExternalLink } from "lucide-react";
 
-const PLATFORM_LINKS = ["Probex Engine", "Architecture", "Compliance", "API Docs"];
+const PLATFORM_LINKS = ["Synatra Engine", "Architecture", "Compliance", "API Docs"];
 const COMPANY_LINKS  = ["About QUBO",   "Careers",      "Press",      "Contact"];
 const LEGAL_LINKS    = ["Privacy Policy","Terms of Service","Cookie Policy"];
 
-const PROBEX_URL = process.env.NEXT_PUBLIC_PROBEX_URL ?? "#";
+const SYNATRA_URL = process.env.NEXT_PUBLIC_SYNATRA_URL ?? "#";
 
 function FooterCol({ heading, links }: { heading: string; links: string[] }) {
   return (
@@ -77,7 +77,7 @@ export default function Footer() {
                   background: "rgba(0,229,255,0.05)",
                 }}
               >
-                PROBEX
+                SYNATRA
               </span>
             </div>
 
@@ -108,14 +108,14 @@ export default function Footer() {
             {/* Platform link */}
             <div className="mt-4">
               <a
-                href={PROBEX_URL}
+                href={SYNATRA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs transition-colors duration-200 group"
                 style={{ color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}
               >
                 <span className="group-hover:text-[var(--cyan-dim)] transition-colors duration-200">
-                  probex.platform
+                  synatra.platform
                 </span>
                 <ExternalLink size={10} className="group-hover:text-[var(--cyan-dim)] transition-colors duration-200" />
               </a>
@@ -142,7 +142,7 @@ export default function Footer() {
             className="text-[10px] tracking-[0.2em]"
             style={{ color: "rgba(0,229,255,0.15)", fontFamily: "'JetBrains Mono', monospace" }}
           >
-            PROBEX::CONSENSUS ENGINE
+            SYNATRA::CONSENSUS ENGINE
           </p>
         </div>
       </div>

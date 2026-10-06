@@ -6,7 +6,7 @@ import Reveal from "@/components/ui/Reveal";
 import { sectionReveal, defaultViewport } from "@/components/ui/motion";
 
 /* ─── REAL PRODUCT MODEL ──────────────────────────────────────────────────
-   The Probex platform is a BTC prediction-market trading-operations console
+   The Synatra platform is a BTC prediction-market trading-operations console
    (see DASHBOARD-FEATURE-SPEC.md): summary pulse, open positions with live
    PnL, survival/risk state, and component health. This preview recreates that
    presentation with representative data using the shared glass design system.
@@ -148,7 +148,7 @@ export default function DashboardPreview() {
 
         {/* HEADER */}
         <Reveal>
-          <p className="label-tag mb-4">[ PROBEX PLATFORM ]</p>
+          <p className="label-tag mb-4">[ SYNATRA PLATFORM ]</p>
           <div className="grid md:grid-cols-2 gap-10 items-end mb-12">
             <h2
               className="text-gradient-white"
@@ -157,7 +157,7 @@ export default function DashboardPreview() {
               Live Trading<br />Operations Console
             </h2>
             <p className="text-sm leading-relaxed" style={{ fontFamily: "var(--font-heading-stack)", color: "var(--text-secondary)" }}>
-              The Probex operator console tracks BTC prediction-market positions,
+              The Synatra operator console tracks BTC prediction-market positions,
               live edge and PnL, feed health, and adaptive risk state — the real
               trading surface, streamed in a single dense view.
             </p>
@@ -181,7 +181,7 @@ export default function DashboardPreview() {
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,189,68,0.7)" }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(39,201,63,0.7)" }} />
               <span className="ml-3 text-[10px] tracking-[0.16em]" style={{ fontFamily: "var(--font-mono-stack)", color: "#3d5570" }}>
-                probex // trading-ops
+                synatra // trading-ops
               </span>
               <span className="ml-1 text-[8px] px-1.5 py-0.5 rounded tracking-[0.16em] uppercase" style={{ fontFamily: "var(--font-mono-stack)", color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)" }}>
                 Paper
@@ -309,7 +309,7 @@ export default function DashboardPreview() {
                 </div>
               ))}
             </div>
-            <span style={{ fontFamily: "var(--font-mono-stack)", fontSize: "0.5rem", color: "#2a3f55", letterSpacing: "0.18em", textTransform: "uppercase" }}>PROBEX::OPS::v3.2.1</span>
+            <span style={{ fontFamily: "var(--font-mono-stack)", fontSize: "0.5rem", color: "#2a3f55", letterSpacing: "0.18em", textTransform: "uppercase" }}>SYNATRA::OPS</span>
           </div>
         </motion.div>
       </div>

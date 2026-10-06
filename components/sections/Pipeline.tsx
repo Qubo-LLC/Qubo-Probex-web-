@@ -24,7 +24,7 @@ const STAGES = [
     index: "02",
     tag: "NORMALISATION",
     title: "Schema & Weight Calibration",
-    desc: "Ingested streams are resolved against Probex's unified schema layer. Conflicting signals are probability-weighted using a rolling Bayesian calibration model. Stale events are expired on a per-source TTL; recency decay functions ensure the consensus state always reflects live market reality.",
+    desc: "Ingested streams are resolved against Synatra's unified schema layer. Conflicting signals are probability-weighted using a rolling Bayesian calibration model. Stale events are expired on a per-source TTL; recency decay functions ensure the consensus state always reflects live market reality.",
     metrics: [
       { label: "Normalisation",     value: "< 8ms"   },
       { label: "Calibration Cycle", value: "50ms"    },
@@ -36,8 +36,8 @@ const STAGES = [
   {
     index: "03",
     tag: "CONSENSUS ENGINE",
-    title: "Probex Consensus Layer",
-    desc: "Normalised signals enter the core Probex consensus engine — a distributed probabilistic voter that resolves multi-party event states with cryptographic finality. Quorum thresholds, deviation bands, and outlier rejection rules are enforced deterministically before any state update is committed.",
+    title: "Synatra Consensus Layer",
+    desc: "Normalised signals enter the core Synatra consensus engine — a distributed probabilistic voter that resolves multi-party event states with cryptographic finality. Quorum thresholds, deviation bands, and outlier rejection rules are enforced deterministically before any state update is committed.",
     metrics: [
       { label: "Consensus Precision", value: "99.42%" },
       { label: "Quorum Latency",      value: "< 22ms" },
@@ -50,7 +50,7 @@ const STAGES = [
     index: "04",
     tag: "COMPLIANCE GATE",
     title: "Regulatory Output & Audit",
-    desc: "Every committed state transition is routed through Probex's compliance guardrails before reaching end-consumer APIs. Jurisdiction rules, exposure caps, and mandatory reporting triggers are evaluated in-band. All outputs are written to an immutable audit log with full provenance tracing.",
+    desc: "Every committed state transition is routed through Synatra's compliance guardrails before reaching end-consumer APIs. Jurisdiction rules, exposure caps, and mandatory reporting triggers are evaluated in-band. All outputs are written to an immutable audit log with full provenance tracing.",
     metrics: [
       { label: "Gate Latency",   value: "< 6ms"  },
       { label: "Audit Coverage", value: "100%"   },
@@ -283,7 +283,7 @@ export default function Pipeline() {
             className="max-w-lg text-sm leading-relaxed mb-16"
             style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
           >
-            Probex&apos;s four-stage processing architecture transforms noisy, multi-origin
+            Synatra&apos;s four-stage processing architecture transforms noisy, multi-origin
             predictive feeds into cryptographically finalised consensus states in under
             90 milliseconds end-to-end.
           </p>

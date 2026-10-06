@@ -156,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
 }
 
-.text-gradient-probex {
+.text-gradient-synatra {
   background: linear-gradient(135deg, #00e5ff 0%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

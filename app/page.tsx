@@ -20,7 +20,7 @@ export default function Home() {
         <Pipeline />
       </SectionWrapper>
 
-      {/* ── PROBEX ARCHITECTURE ── */}
+      {/* ── SYNATRA ARCHITECTURE ── */}
       <SectionWrapper delay={0.06}>
         <Architecture />
       </SectionWrapper>
