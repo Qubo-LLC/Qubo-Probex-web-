@@ -17,7 +17,7 @@ const FRAMEWORKS = [
     accentDim: "rgba(0,229,255,0.08)",
     formula: "P(H|E) = P(E|H) · P(H) / P(E)",
     formulaAnnotation: "Posterior · Likelihood × Prior / Evidence",
-    desc: "Probex's core inference layer applies hierarchical Bayesian updating across all consensus inputs. Each new event updates a rolling prior distribution — signal confidence degrades gracefully under sparse data rather than collapsing to binary outcomes.",
+    desc: "Synatra's core inference layer applies hierarchical Bayesian updating across all consensus inputs. Each new event updates a rolling prior distribution — signal confidence degrades gracefully under sparse data rather than collapsing to binary outcomes.",
     properties: [
       { label: "Update frequency",  value: "50ms rolling" },
       { label: "Prior distribution", value: "Beta(α,β)"   },
@@ -51,7 +51,7 @@ const FRAMEWORKS = [
     accentDim: "rgba(0,229,255,0.08)",
     formula: "BS = (1/N) Σ (fₜ − oₜ)²",
     formulaAnnotation: "Mean Squared Error of Probability Forecasts",
-    desc: "All Probex probability outputs are continuously evaluated against resolved outcomes using the Brier Score. Validators whose forecasts systematically underperform are downweighted in future consensus rounds. Calibration curves are published on-chain for independent verification.",
+    desc: "All Synatra probability outputs are continuously evaluated against resolved outcomes using the Brier Score. Validators whose forecasts systematically underperform are downweighted in future consensus rounds. Calibration curves are published on-chain for independent verification.",
     properties: [
       { label: "Target BS",       value: "< 0.06"     },
       { label: "Rolling window",  value: "2,000 events" },
@@ -199,13 +199,13 @@ export default function SuperCore() {
                 lineHeight: 1.1,
               }}
             >
-              The Mathematics<br />Behind Probex
+              The Mathematics<br />Behind Synatra
             </h2>
             <p
               className="text-sm leading-relaxed"
               style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
             >
-              Probex&apos;s predictive accuracy rests on four interlocking mathematical
+              Synatra&apos;s predictive accuracy rests on four interlocking mathematical
               frameworks — chosen for their formal guarantees, not their familiarity.
               Every layer can be independently audited against its specification.
             </p>

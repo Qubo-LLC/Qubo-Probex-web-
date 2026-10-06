@@ -13,7 +13,7 @@ import WaveBackground from "@/components/backgrounds/WaveBackground";
 import CursorGlow from "@/components/ui/CursorGlow";
 import MiniChart from "@/components/ui/MiniChart";
 
-const PROBEX_URL = process.env.NEXT_PUBLIC_PROBEX_URL ?? "#";
+const SYNATRA_URL = process.env.NEXT_PUBLIC_SYNATRA_URL ?? "#";
 
 const LIVE_STATS = [
   { label: "Consensus",  value: "99.42%"  },
@@ -154,7 +154,7 @@ export default function Hero() {
           >
             <span className="text-gradient-white">QUBO</span>
             <br />
-            <span className="text-gradient-probex">Probex</span>
+            <span className="text-gradient-synatra">Synatra</span>
           </motion.h1>
         </div>
 
@@ -226,13 +226,13 @@ export default function Hero() {
           className="mt-9 flex gap-3 flex-col sm:flex-row items-center"
         >
           {/* Primary */}
-          <a href={PROBEX_URL} target="_blank" rel="noopener noreferrer">
+          <a href={SYNATRA_URL} target="_blank" rel="noopener noreferrer">
             <motion.span
               whileHover={{ scale: 1.03, boxShadow: "0 0 40px rgba(0,229,255,0.32), 0 0 80px rgba(124,58,237,0.14)" }}
               whileTap={{ scale: 0.97 }}
               className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-sm tracking-wide gpu"
             >
-              Access Probex
+              Access Synatra
               <ExternalLink size={13} />
             </motion.span>
           </a>

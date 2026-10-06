@@ -25,9 +25,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QUBO LLC — Probex Predictive Infrastructure",
+  title: "QUBO LLC — Synatra Predictive Infrastructure",
   description:
-    "Probex is QUBO's real-time probabilistic consensus and predictive engine — institutional-grade infrastructure for high-density, compliant predictive markets.",
+    "Synatra is QUBO's real-time probabilistic consensus and predictive engine — institutional-grade infrastructure for high-density, compliant predictive markets.",
+     icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export const viewport: Viewport = {

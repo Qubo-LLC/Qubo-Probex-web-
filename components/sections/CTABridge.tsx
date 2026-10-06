@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, Terminal, ShieldCheck, Zap } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
 
-/* ─── Reads from env — set NEXT_PUBLIC_PROBEX_URL in .env.local ─────── */
-const PROBEX_URL = process.env.NEXT_PUBLIC_PROBEX_URL ?? "#";
+/* ─── Reads from env — set NEXT_PUBLIC_SYNATRA_URL in .env.local ─────── */
+const SYNATRA_URL = process.env.NEXT_PUBLIC_SYNATRA_URL ?? "#";
 
 const TRUST_SIGNALS = [
   { icon: ShieldCheck, label: "SOC 2 Type II",         value: "Certified"  },
@@ -73,14 +73,14 @@ export default function CTABridge() {
               >
                 <span className="text-gradient-white">Ready to trade on</span>
                 <br />
-                <span className="text-gradient-probex">real-time consensus?</span>
+                <span className="text-gradient-synatra">real-time consensus?</span>
               </h2>
 
               <p
                 className="max-w-lg text-sm leading-relaxed mb-8"
                 style={{ fontFamily: "Manrope, sans-serif", color: "var(--text-secondary)" }}
               >
-                Probex is live. Institutional and professional counterparties can access
+                Synatra is live. Institutional and professional counterparties can access
                 the full platform today — live markets, real-time consensus feeds,
                 and compliance tooling for 47 jurisdictions.
               </p>
@@ -114,9 +114,9 @@ export default function CTABridge() {
 
               {/* CTA BUTTONS */}
               <div className="flex items-center gap-4 flex-wrap">
-                {/* Primary — Access Probex Platform */}
+                {/* Primary — Access Synatra Platform */}
                 <a
-                  href={PROBEX_URL}
+                  href={SYNATRA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -131,7 +131,7 @@ export default function CTABridge() {
                       letterSpacing: "0.01em",
                     }}
                   >
-                    Access Probex Platform
+                    Access Synatra Platform
                     <ArrowRight size={15} />
                   </motion.span>
                 </a>
@@ -179,7 +179,7 @@ export default function CTABridge() {
                     className="ml-2 text-[9px] tracking-[0.16em]"
                     style={{ fontFamily: "'JetBrains Mono', monospace", color: "#2a3f55" }}
                   >
-                    probex-cli
+                    synatra-cli
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -192,7 +192,7 @@ export default function CTABridge() {
 
               {/* Terminal body */}
               <div className="px-4 py-4 space-y-2" style={{ minHeight: 220 }}>
-                <PromptLine text="probex auth --mode=institutional" delay={0.1} />
+                <PromptLine text="synatra auth --mode=institutional" delay={0.1} />
                 <motion.div
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -204,7 +204,7 @@ export default function CTABridge() {
                   </span>
                 </motion.div>
 
-                <PromptLine text="probex market list --active" delay={0.5} />
+                <PromptLine text="synatra market list --active" delay={0.5} />
                 <motion.div
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -213,9 +213,9 @@ export default function CTABridge() {
                   className="pl-3 space-y-1"
                 >
                   {[
-                    "PRX-001  Fed rate cut Q3       YES: 67.4%",
-                    "PRX-002  BTC > $120k EOM       YES: 44.1%",
-                    "PRX-005  NVDA earnings beat    YES: 72.9%",
+                    "SYN-001  Fed rate cut Q3       YES: 67.4%",
+                    "SYN-002  BTC > $120k EOM       YES: 44.1%",
+                    "SYN-005  NVDA earnings beat    YES: 72.9%",
                     "  ... 837 markets active",
                   ].map((line, i) => (
                     <p key={i} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "0.58rem", color: i === 3 ? "#2a3f55" : "#4a6680" }}>
@@ -224,7 +224,7 @@ export default function CTABridge() {
                   ))}
                 </motion.div>
 
-                <PromptLine text="probex consensus --stream PRX-001" delay={1.1} />
+                <PromptLine text="synatra consensus --stream SYN-001" delay={1.1} />
                 <motion.div
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -257,10 +257,10 @@ export default function CTABridge() {
                 <span
                   style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "0.55rem", color: "#2a3f55" }}
                 >
-                  {PROBEX_URL !== "#" ? PROBEX_URL.replace(/^https?:\/\//, "") : "platform.probex.io"}
+                  {SYNATRA_URL !== "#" ? SYNATRA_URL.replace(/^https?:\/\//, "") : "platform.synatra.io"}
                 </span>
                 <a
-                  href={PROBEX_URL}
+                  href={SYNATRA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 transition-colors duration-200"
