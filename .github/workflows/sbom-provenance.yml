@@ -72,7 +72,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      digest: ${{ steps.hash.outputs.digest }}
+      hashes: ${{ steps.hash.outputs.hashes }}
     steps:
       - name: Checkout
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
@@ -97,9 +97,8 @@ jobs:
       - name: Generate checksum digest
         id: hash
         run: |
-          DIGEST=$(sha256sum build-artifact.tar.gz | awk '{print $1}')
-          echo "digest=sha256:${DIGEST}" >> "$GITHUB_OUTPUT"
-          echo "${DIGEST}  build-artifact.tar.gz" > build-artifact.tar.gz.sha256
+          sha256sum build-artifact.tar.gz > build-artifact.tar.gz.sha256
+          echo "hashes=$(base64 -w0 < build-artifact.tar.gz.sha256)" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.x
@@ -122,10 +121,10 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0 # zizmor: ignore[unpinned-uses] -- SLSA generator must be tag-pinned; its OIDC/Sigstore trust chain and internal path resolution depend on the release tag, not a raw commit SHA. See https://github.com/slsa-framework/slsa-github-generator
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0 # zizmor: ignore[unpinned-uses] -- SLSA generator must be tag-pinned; its OIDC/Sigstore trust chain and internal path resolution depend on the release tag, not a raw commit SHA. See https://github.com/slsa-framework/slsa-github-generator
     with:
       base64-subjects: "${{ needs.build-artifact.outputs.digest }}"
-      compile-generator: true
+
 
 # =============================================================================
 # NEXT STEPS:
